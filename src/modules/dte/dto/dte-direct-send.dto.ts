@@ -89,7 +89,7 @@ export class DteDirectSendDto {
   emisor_id: string;
 
   @ApiProperty({
-    example: '01'
+    example: '14'
   })
   @IsString()
   tipo_dte: string;
