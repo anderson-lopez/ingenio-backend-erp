@@ -189,4 +189,46 @@ export class DteService {
     return this.getValidToken();   // reutiliza la lógica de caché interna
   }
 
+  // services/dte.service.ts
+  async sendDteDirectly(dte: any) {
+    this.logger.log('🚀 Iniciando envío directo de DTE a Hacienda…');
+  
+    try {
+      // 🔑 Obtén el token válido (lo refresca si está vencido)
+      const token = await this.getValidToken();
+  
+      // 📦 Construir el cuerpo de la solicitud
+      const requestBody = {
+        token,
+        usuario: this.config.get<string>('HACIENDA_USER'),
+        emisor_id: 1, // Ajusta este valor según corresponda en tu sistema
+        tipo_dte: '14', // Ejemplo: Factura (01), Nota de crédito (03), etc.
+        dte_json: JSON.stringify(dte), // 🔥 Ojo: debe ser un string JSON, no objeto
+      };
+  
+      this.logger.debug('🔎 Enviando requestBody a Hacienda:', JSON.stringify(requestBody));
+  
+      // 🚀 Hacer la petición POST directamente a Hacienda
+      const response = await firstValueFrom(
+        this.http.post(this.sendUrl, requestBody, {
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Ingenio360-DTE/1.0',
+          },
+        }),
+      );
+  
+      this.logger.log('✅ DTE enviado directamente a Hacienda.');
+      this.logger.verbose('📦 Respuesta de Hacienda:', JSON.stringify(response.data));
+  
+      return response.data;
+    } catch (err) {
+      this.logger.error('❌ Error al enviar DTE directo a Hacienda:', err);
+      throw err;
+    }
+  }
+  
+
+
+
 }

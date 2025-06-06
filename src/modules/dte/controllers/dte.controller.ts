@@ -11,7 +11,9 @@ import {
 import { DteService } from '../services/dte.service';
 import { DteBuildDto } from '../dto/dte-build.dto';
 import { SignDteDto, SendSignedDteDto } from '../dto/dte.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { DteDirectSendDto } from '../dto/dte-direct-send.dto';
+
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Dte')
 @Controller('dte')
@@ -50,4 +52,18 @@ export class DteController {
     // sendToHacienda llama internamente a getValidToken()
     return this.dteService.sendToHacienda(dto.signedDte);
   }
+
+  @Post('send-direct')
+  @ApiOperation({ summary: 'Firma y envía un DTE directamente a Hacienda' })
+  @ApiResponse({ status: 201, description: 'DTE firmado y enviado exitosamente' })
+  async sendDirect(@Body() dto: DteDirectSendDto) {
+    this.logger.log('📥 Datos recibidos para firma y envío directo:', dto);
+    const response = await this.dteService.sendDteDirectly(dto);
+    return {
+      message: '✅ DTE firmado y enviado a Hacienda exitosamente',
+      haciendaResponse: response,
+    };
+  }
+
+
 }
