@@ -10,6 +10,8 @@ import { MongoFileStorageModule } from './modules/mongo-file-storage/mongo-file-
 import { BitacoraLogsModule } from './modules/bitacora-logs/bitacora-logs.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { PurchaseModule } from './modules/purchase/purchase.module';
+import { DteModule } from './modules/dte/dte.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,6 +27,7 @@ import { PurchaseModule } from './modules/purchase/purchase.module';
     MongoFileStorageModule,
     AuthenticationModule,
     PurchaseModule,
+    DteModule,
     SaleModule,
     InventoryModule    
   ],
