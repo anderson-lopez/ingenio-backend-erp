@@ -11,7 +11,9 @@ import {
 import { DteService } from '../services/dte.service';
 import { DteBuildDto } from '../dto/dte-build.dto';
 import { SignDteDto, SendSignedDteDto } from '../dto/dte.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Dte')
 @Controller('dte')
 export class DteController {
   private readonly logger = new Logger(DteController.name);
