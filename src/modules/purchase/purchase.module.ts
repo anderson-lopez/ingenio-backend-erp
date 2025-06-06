@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { PurchaseController } from './purchase.controller';
 import { PurchaseService } from './services/purchase.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ParseIntPipe } from '@nestjs/common';
+
 import {
   Product,
   Supplier,
@@ -24,6 +26,7 @@ import { User } from '../authentication/entities/user.entity';
       PurchaseDocumentType,
       DiscountApproval,
       User,
+      ParseIntPipe
     ]),
   ],
   controllers: [PurchaseController],

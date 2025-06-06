@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { RouterExplorer } from '@nestjs/core/router/router-explorer';
 
 async function bootstrap() {
   const logger = new Logger('ApiGateway');
@@ -10,6 +11,15 @@ async function bootstrap() {
   const port = +process.env.PORT || 3000;
   const corsOriginUrl = process.env.CORS_ORIGIN_URL || '*';
   const app = await NestFactory.create(AppModule);
+
+  // 👇 Agregar un log global de rutas
+  app.use((req, res, next) => {
+    console.log('🔍 Ruta llamada:', req.method, req.url);
+    next();
+  });
+
+  
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: false, // Elimina propiedades que no están en el DTO

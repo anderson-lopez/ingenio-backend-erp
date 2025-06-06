@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
 import {
   Product,
   Supplier,
@@ -86,14 +87,7 @@ export class PurchaseService {
   }
   
 
-  async getPurchaseById(id: number) {
-    const purchase = await this.purchaseRepository.findOne({
-      where: { id },
-      relations: ['purchaseDetails', 'supplier'],
-    });
-    if (!purchase) throw new NotFoundException('Purchase not found');
-    return purchase;
-  }
+
 
   async authorizeProductDiscount(request: PurchaseAuthorizeDiscountDto) {
     const product = await this.productRepository.findOne({
@@ -141,24 +135,31 @@ export class PurchaseService {
   }
 
   async getAllSuppliers() {
+    console.log('🔍 Entró al getAllSuppliers');
     const data = await this.supplierRepository.find();
-    if (!data.length) throw new NotFoundException('Suppliers not found');
-    return data;
+    console.log('🔍 Data obtenida:', 'data');
+    return {
+      message: data.length ? 'Proveedores encontrados.' : 'No hay proveedores registrados.',
+      data,
+    };
   }
-
-  async getOneSupplierById(id: number) {
-    const supplier = await this.supplierRepository.findOne({ where: { id } });
-    if (!supplier) throw new NotFoundException('Supplier not found');
-    return supplier;
-  }
+  
 
   // 🔧 Ajuste aquí: el método recibe el DTO, no la entidad
   async createSupplier(supplierDto: SupplierRequestDto) {
+    console.log('🔍 Entró a createSupplier con DTO:', supplierDto);
+  
     const newSupplier = this.supplierRepository.create({
       ...supplierDto,
     });
-    return this.supplierRepository.save(newSupplier);
+    console.log('🔍 Objeto creado para guardar:', newSupplier);
+  
+    const savedSupplier = await this.supplierRepository.save(newSupplier);
+    console.log('✅ Proveedor guardado en la base de datos:', savedSupplier);
+  
+    return savedSupplier;
   }
+  
 
   async getAllPaymentMethods() {
     const data = await this.paymentMethodRepository.find();
@@ -181,4 +182,29 @@ export class PurchaseService {
     // Implementar lógica para obtener una orden de compra pendiente si es necesario
     return {};
   }
+
+  async getPurchaseById(id: number) {
+    const purchase = await this.purchaseRepository.findOne({
+      where: { id },
+      relations: ['PurchaseDetails', 'supplier'],
+    });
+    if (!purchase) throw new NotFoundException('Purchase not found');
+    return purchase;
+  }
+
+  async getOneSupplierById(id: number) {
+    console.log('🔍 Entró a getOneSupplierById con id:', id);
+  
+    const supplier = await this.supplierRepository.findOne({ where: { id } });
+    console.log('🔍 Resultado de findOne:', supplier);
+  
+    if (!supplier) {
+      console.warn('⚠️ No se encontró el proveedor con id:', id);
+      throw new NotFoundException('Supplier not found');
+    }
+  
+    console.log('✅ Proveedor encontrado:', supplier);
+    return supplier;
+  }
+
 }

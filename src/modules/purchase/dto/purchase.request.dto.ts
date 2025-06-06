@@ -46,69 +46,82 @@ export class PurchaseDetailRequestDto {
 
 export class PurchaseRequestDto {
   
-  @ApiProperty()
+  @ApiProperty({ example: 1 })
   @IsNumber()
   @IsPositive()
   supplier_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: '2025-06-06T00:00:00Z' })
   @IsString()
   purchase_date: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'INV12345' })
   @IsOptional()
   @IsString()
   invoice_number: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 1 })
   @IsNumber()
   @IsPositive()
   payment_method_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'Comentario de prueba' })
   @IsOptional()
   @IsString()
   comments: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 1 })
   @IsNumber()
   @IsPositive()
   document_type_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 1 })
   @IsNumber()
   @IsPositive()
   branch_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 100.00 })
   @IsNumber()
   @IsPositive()
   subtotal: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 0.00 })
   @IsNumber()
   discount_total: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 0.00 })
   @IsNumber()
   tax_total: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 100.00 })
   @IsNumber()
   @IsPositive()
   total_purchase: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 1 })
   @IsNumber()
   @IsPositive()
   cashier_id: number;
 
-  @ApiProperty()
+  @ApiProperty({ example: 1 })
   @IsNumber()
   @IsPositive()
   manager_id: number;
 
-  @ApiProperty({ type: [PurchaseDetailRequestDto] })
+  @ApiProperty({
+    type: [PurchaseDetailRequestDto],
+    example: [
+      {
+        product_id: 1,
+        quantity: 2,
+        unit_price: 50.00,
+        sub_total: 100.00,
+        discount: 0,
+        tax_amount: 0,
+        total_line: 100.00
+      }
+    ]
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => PurchaseDetailRequestDto)
