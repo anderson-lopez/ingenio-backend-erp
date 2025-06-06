@@ -9,6 +9,7 @@ import { SaleModule } from './modules/sale/sale.module';
 import { MongoFileStorageModule } from './modules/mongo-file-storage/mongo-file-storage.module';
 import { BitacoraLogsModule } from './modules/bitacora-logs/bitacora-logs.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
+import { PurchaseModule } from './modules/purchase/purchase.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,8 +24,9 @@ import { InventoryModule } from './modules/inventory/inventory.module';
     BitacoraLogsModule,
     MongoFileStorageModule,
     AuthenticationModule,
+    PurchaseModule,
     SaleModule,
-    InventoryModule,
+    InventoryModule    
   ],
   controllers: [AppController],
   providers: [AppService],

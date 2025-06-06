@@ -7,16 +7,32 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { SaleDetail } from './SaleDetail.entity';
+import { PurchaseDetail } from './PurchaseDetail.entity';
 import { Order } from '../Orders/Order.entity';
+import { Supplier } from '../Suppliers/Supplier.entity'; // 🔥 Agregar importación
 
-@Entity('sales', { schema: 'sale' })
-export class Sale extends BaseEntity {
+@Entity('Purchases', { schema: 'Purchase' })
+export class Purchase extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: 'integer', name: 'branch_id', nullable: true })
+  branchId: number;
+
+
   @Column({ type: 'integer', name: 'client_id', nullable: true })
   clientId: number;
+
+  // 🔥 Aquí colocamos las nuevas propiedades y la relación con Supplier
+  @Column({ type: 'integer', name: 'supplier_id', nullable: true })
+  supplierId: number;
+
+  @ManyToOne(() => Supplier)
+  @JoinColumn({ name: 'supplier_id' })
+  supplier: Supplier;
+
+  @Column({ type: 'integer', name: 'document_type_id', nullable: true })
+  documentTypeId: number;
 
   @Column({ type: 'varchar', length: 100, name: 'guest_name' })
   guestName: string;
@@ -29,10 +45,10 @@ export class Sale extends BaseEntity {
 
   @Column({
     type: 'timestamp',
-    name: 'sale_date',
+    name: 'purchase_date',
     default: () => 'CURRENT_TIMESTAMP',
   })
-  saleDate: Date;
+  PurchaseDate: Date;
 
   @Column({ type: 'numeric', precision: 10, scale: 2 })
   total: number;
@@ -58,15 +74,15 @@ export class Sale extends BaseEntity {
   @Column({ type: 'varchar', length: 150, name: 'transfer_number' })
   transferNumber: string;
 
-  @Column({ type: 'integer', name: 'document_type_sale_id' })
-  documentTypeSaleId: number;
+  @Column({ type: 'integer', name: 'document_type_purchase_id', nullable: true })
+  documentTypePurchaseId: number;
 
-  @Column({ type: 'integer', name: 'sale_status_id' })
-  saleStatusId: number;
+  @Column({ type: 'integer', name: 'purchase_status_id' })
+  PurchaseStatusId: number;
 
-  @Column({ type: 'numeric', precision: 10, scale: 2, name: 'sub_total' })
-  subtotal: number;
- 
+  @Column({ type: 'numeric', precision: 10, scale: 2, name: 'subtotal' })
+  subTotal: number;  
+
   @Column({ type: 'numeric', precision: 10, scale: 2, name: 'total_discount' })
   totalDiscount: number;
 
@@ -78,13 +94,13 @@ export class Sale extends BaseEntity {
   })
   totalTaxAmount: number;
 
-  @Column({ type: 'numeric', precision: 10, scale: 2, name: 'total_sale' })
-  totalSale: number;
+  @Column({ type: 'numeric', precision: 10, scale: 2, name: 'total_purchase' })
+  totalPurchase: number;
 
-  @OneToMany(() => SaleDetail, (saleDetail) => saleDetail.sale, {
+  @OneToMany(() => PurchaseDetail, (PurchaseDetail) => PurchaseDetail.Purchase, {
     cascade: ['insert', 'update'],
   })
-  saleDetails: SaleDetail[];
+  PurchaseDetails: PurchaseDetail[];
 
   @ManyToOne(() => Order)
   @JoinColumn({ name: 'order_id' })

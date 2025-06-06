@@ -6,15 +6,15 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Sale } from '../index';
+import { Purchase } from '../index';
 
-@Entity('sale_details', { schema: 'sale' })
-export class SaleDetail extends BaseEntity {
+@Entity('PurchaseDetails', { schema: 'Purchase' })
+export class PurchaseDetail extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'integer', name: 'sale_id' })
-  saleId: number;
+  @Column({ type: 'integer', name: 'purchase_id' })
+  PurchaseId: number;
 
   @Column({ type: 'integer', name: 'product_id' })
   productId: number;
@@ -26,7 +26,7 @@ export class SaleDetail extends BaseEntity {
   unitPrice: number;
 
   @Column({ type: 'numeric', precision: 10, scale: 2, name: 'sub_total' })
-  sub_total: number;  
+  subTotal: number;
 
   @Column({ type: 'numeric', precision: 10, scale: 2 })
   discount: number;
@@ -37,7 +37,7 @@ export class SaleDetail extends BaseEntity {
   @Column({ type: 'numeric', precision: 10, scale: 2, name: 'total_line' })
   totalLine: number;
 
-  @ManyToOne(() => Sale, (sale) => sale.saleDetails)
-  @JoinColumn({ name: 'sale_id' })
-  sale: Sale;
+  @ManyToOne(() => Purchase, (Purchase) => Purchase.PurchaseDetails)
+  @JoinColumn({ name: 'purchase_id' })
+  Purchase: Purchase;
 }
