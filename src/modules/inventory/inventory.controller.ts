@@ -116,8 +116,14 @@ export class InventoryController {
   @Post('/product')
   @ApiOperation({ summary: 'Create a new product' })
   async createProduct(@Body() request: CreateProductDto) {
+    console.log('🌟 CreateProductDto recibido en el endpoint /api/v1/inventory/product');
+    console.log('🔹 general_information:', JSON.stringify(request.general_information, null, 2));
+    console.log('🔹 wms_information:', JSON.stringify(request.wms_information, null, 2));
+    console.log('🔹 product_images:', JSON.stringify(request.product_images, null, 2));
+  
     return this.inventoryService.createProduct(request);
   }
+  
 
   @Put('/product')
   @ApiOperation({ summary: 'Update the general information and images to specific product' })

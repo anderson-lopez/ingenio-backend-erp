@@ -337,16 +337,24 @@ export class InventoryService {
   }
 
   async createProduct(request: CreateProductDto) {
+    console.log('🌟 Iniciando creación de producto con DTO:', JSON.stringify(request, null, 2));
+  
+    // Verificar si el producto ya existe
+    console.log('🔍 Buscando producto existente con internal_code:', request.general_information.internal_code);
     const productExist = await this.productRepository.findOne({
       where: {
         internal_code: request.general_information.internal_code,
       },
     });
-
+  
     if (productExist) {
+      console.error('❌ Producto ya existe con este internal_code.');
       throw new NotFoundException('Product already exist with this Internal Code');
     }
-
+    console.log('✅ No existe producto con ese internal_code, continuamos...');
+  
+    // Crear datos del producto
+    console.log('📝 Creando objeto del producto...');
     const data = this.productRepository.create({
       name: request.general_information.name,
       skuCode: request.general_information.sku_code,
@@ -364,25 +372,24 @@ export class InventoryService {
       providerNumber: request.general_information.provider_number,
       sanSalvadorLocation: request.general_information.location_san_salvador,
     });
-    // product.internal_code =
-    //   request.general_information.name
-    //     .split(' ')
-    //     .map((word) => word[0].toUpperCase())
-    //     .join('') +
-    //   '-' +
-    //   Math.floor(Math.random() * 1000);
-
-    // product.barCodeNumber = this.inventoryProvider.generateBarcode(product);
+  
+    console.log('💾 Guardando producto en la base de datos...');
     const product = await this.productRepository.save(data);
-
+    console.log('✅ Producto guardado con ID:', product.id);
+  
+    // Buscar la sucursal del almacén
+    console.log('🔍 Buscando WarehouseBranch para la BODEGA_CENTRAL...');
     const warehouseBranch = await this.warehouseBranchRepository.findOne({
       where: {
         warehouse: {
           id: InventoryDictionary.WAREHOUSES.BODEGA_CENTRAL,
         },
-      }
-    })
-
+      },
+    });
+    console.log('✅ WarehouseBranch encontrado:', warehouseBranch);
+  
+    // Crear inventario del producto
+    console.log('📝 Creando objeto ProductInventory...');
     const productInventory = this.productInventoryRepository.create({
       productRotation: request.wms_information.product_rotation_id,
       rackZoneId: request.wms_information.rack_zone_id,
@@ -402,8 +409,13 @@ export class InventoryService {
       warehouseZoneLocation: request.wms_information.warehouse_zone_location,
       alternativeZoneLocation: request.wms_information.alternative_zone_location,
     });
+  
+    console.log('💾 Guardando ProductInventory en la base de datos...');
     const productInventoryCreated = await this.productInventoryRepository.save(productInventory);
-
+    console.log('✅ ProductInventory creado con ID:', productInventoryCreated.id);
+  
+    // Crear imágenes del producto
+    console.log('📝 Creando ProductImages...');
     const productImage = this.productImagesRepository.create(
       request.product_images.map((item) => ({
         productImageMongoId: item.product_image_mongo_id,
@@ -413,9 +425,14 @@ export class InventoryService {
         productId: product.id,
         mongoBucketName: item.mongo_bucket_name,
       })),
-    )
-
+    );
+  
+    console.log('💾 Guardando ProductImages...');
     const productImagesSaved = await this.productImagesRepository.save(productImage);
+    console.log('✅ ProductImages guardadas:', productImagesSaved.length);
+  
+    // Buscar producto completo con relaciones
+    console.log('🔍 Buscando producto completo con relaciones...');
     const dataProduct = await this.productRepository.findOne({
       where: {
         productInventory: {
@@ -441,34 +458,41 @@ export class InventoryService {
         'productInventory.alternativeLevelZone',
       ],
     });
-
+  
+    console.log('🎉 Proceso de creación finalizado. Producto:', JSON.stringify(dataProduct, null, 2));
     return dataProduct;
   }
+  
 
   async updateProduct(request: UpdateProductDto) {
-
+    console.log('🔄 Iniciando actualización del producto:', request.general_information.product_id);
+  
     const product = await this.productRepository.findOne({
       where: {
         id: request.general_information.product_id,
       },
     });
-
+    console.log('🔍 Producto encontrado:', product);
+  
     if (!product) {
+      console.error('❌ Producto no encontrado');
       throw new NotFoundException('Product not found');
     }
-
+  
+    // console.log('Verificando internal_code...');
     // if (request.general_information.internal_code) {
     //   const productExist = await this.productRepository.findOne({
     //     where: {
     //       internal_code: request.general_information.internal_code,
     //     },
     //   });
-
+    //   console.log('🔍 Producto con mismo internal_code encontrado:', productExist);
     //   if (productExist) {
     //     throw new NotFoundException('Product already exist with this Internal Code');
     //   }
     // }
-
+  
+    console.log('✏️ Actualizando campos básicos del producto...');
     product.name = request.general_information.name || product.name;
     product.skuCode = request.general_information.sku_code || product.skuCode;
     product.subcategoryId = request.general_information.subcategory_id || product.subcategoryId;
@@ -485,33 +509,39 @@ export class InventoryService {
     product.offerPrice = request.general_information.offer_price || product.offerPrice;
     product.providerNumber = request.general_information.provider_number || product.providerNumber;
     product.sanSalvadorLocation = request.general_information.location_san_salvador || product.sanSalvadorLocation;
-
+  
+    console.log('🖼️ Obteniendo imágenes actuales del producto...');
     const currentProductImages = await this.productImagesRepository.find({
       where: {
         productId: product.id,
       },
     });
-
+    console.log('🖼️ Imágenes actuales:', currentProductImages);
+  
     const requestImagesQr = request.product_images.filter((item) => item.is_barcode === true);
     const requestImagesCover = request.product_images.filter((item) => item.is_cover === true);
-
+    console.log('📸 Imágenes QR encontradas en request:', requestImagesQr);
+    console.log('📸 Imágenes Cover encontradas en request:', requestImagesCover);
+  
     if (requestImagesQr.length > 0) {
+      console.log('🔄 Actualizando imagen QR...');
       const qrImage = requestImagesQr[0];
-
+  
       if (!this.inventoryProvider.isUrl(qrImage.product_image)) {
+        console.log('🗑️ Eliminando QR actual (no es URL)');
         currentProductImages.forEach(async (item) => {
           if (item.isBarcode) {
-            // delete here
             const bucketName = (item.mongoBucketName == null || item.mongoBucketName == undefined || item.mongoBucketName == "") ? process.env.MONGO_GRIDFS_BUCKET_NAME : item.mongoBucketName;
+            console.log(`🗑️ Eliminando archivo Mongo: ${item.productImageMongoId} del bucket: ${bucketName}`);
             this.mongoFileStorageService.deleteFile(item.productImageMongoId, bucketName);
             item.productImageMongoId = qrImage.product_image;
             item.mongoBucketName = qrImage.mongo_bucket_name;
           }
         });
-
-        // crear si no existe
+  
         const currentQrImage = currentProductImages.find((item) => item.isBarcode);
         if (!currentQrImage) {
+          console.log('🆕 Creando nueva imagen QR en BD');
           const newQrImage = this.productImagesRepository.create({
             productImageMongoId: qrImage.product_image,
             isCover: false,
@@ -524,21 +554,26 @@ export class InventoryService {
         }
       }
     }
+  
     if (requestImagesCover.length > 0) {
+      console.log('🔄 Actualizando imagen Cover...');
       const coverImage = requestImagesCover[0];
-
+  
       if (!this.inventoryProvider.isUrl(coverImage.product_image)) {
+        console.log('🗑️ Eliminando Cover actual (no es URL)');
         currentProductImages.forEach(async (item) => {
           if (item.isCover) {
             const bucketName = (item.mongoBucketName == null || item.mongoBucketName == undefined || item.mongoBucketName == "") ? process.env.MONGO_GRIDFS_BUCKET_NAME : item.mongoBucketName;
+            console.log(`🗑️ Eliminando archivo Mongo: ${item.productImageMongoId} del bucket: ${bucketName}`);
             this.mongoFileStorageService.deleteFile(item.productImageMongoId, bucketName);
             item.productImageMongoId = coverImage.product_image;
             item.mongoBucketName = coverImage.mongo_bucket_name;
           }
         });
-
+  
         const currentCoverImage = currentProductImages.find((item) => item.isCover);
         if (!currentCoverImage) {
+          console.log('🆕 Creando nueva imagen Cover en BD');
           const newCoverImage = this.productImagesRepository.create({
             productImageMongoId: coverImage.product_image,
             isCover: true,
@@ -551,9 +586,16 @@ export class InventoryService {
         }
       }
     }
-
+  
+    console.log('💾 Guardando imágenes actualizadas en la base de datos...');
     await this.productImagesRepository.save(currentProductImages);
+    console.log('✅ Imágenes actualizadas guardadas.');
+  
+    console.log('💾 Guardando producto actualizado en la base de datos...');
     await this.productRepository.save(product);
+    console.log('✅ Producto actualizado guardado.');
+  
+    console.log('🔄 Recuperando producto final con relaciones...');
     const productUpdated = await this.productRepository.findOne({
       where: { id: request.general_information.product_id },
       relations: [
@@ -564,9 +606,11 @@ export class InventoryService {
         'productInventory.warehouseBranch.branch',
       ],
     });
+    console.log('🎉 Producto actualizado y listo para retornar:', productUpdated);
+  
     return productUpdated;
-
   }
+  
 
   async addProductImages(request: CreateProductImageDto[]) {
     const data = await this.productRepository.find();

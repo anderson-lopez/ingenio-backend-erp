@@ -64,7 +64,7 @@ export class Sale extends BaseEntity {
   @Column({ type: 'integer', name: 'sale_status_id' })
   saleStatusId: number;
 
-  @Column({ type: 'numeric', precision: 10, scale: 2, name: 'sub_total' })
+  @Column({ type: 'numeric', precision: 10, scale: 2, name: 'subtotal' })
   subtotal: number;
  
   @Column({ type: 'numeric', precision: 10, scale: 2, name: 'total_discount' })

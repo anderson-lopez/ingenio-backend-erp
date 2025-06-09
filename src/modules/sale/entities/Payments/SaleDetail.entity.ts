@@ -25,7 +25,7 @@ export class SaleDetail extends BaseEntity {
   @Column({ type: 'numeric', precision: 10, scale: 2, name: 'unit_price' })
   unitPrice: number;
 
-  @Column({ type: 'numeric', precision: 10, scale: 2, name: 'sub_total' })
+  @Column({ type: 'numeric', precision: 10, scale: 2, name: 'subtotal' })
   sub_total: number;  
 
   @Column({ type: 'numeric', precision: 10, scale: 2 })

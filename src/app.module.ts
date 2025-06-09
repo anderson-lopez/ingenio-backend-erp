@@ -11,6 +11,7 @@ import { BitacoraLogsModule } from './modules/bitacora-logs/bitacora-logs.module
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { PurchaseModule } from './modules/purchase/purchase.module';
 import { DteModule } from './modules/dte/dte.module';
+import { ContabilidadModule } from './modules/contabilidad/contabilidad.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { DteModule } from './modules/dte/dte.module';
     PurchaseModule,
     DteModule,
     SaleModule,
+    ContabilidadModule,
     InventoryModule    
   ],
   controllers: [AppController],
