@@ -468,9 +468,7 @@ export class InventoryService {
     console.log('🔄 Iniciando actualización del producto:', request.general_information.product_id);
   
     const product = await this.productRepository.findOne({
-      where: {
-        id: request.general_information.product_id,
-      },
+      where: { id: request.general_information.product_id },
     });
     console.log('🔍 Producto encontrado:', product);
   
@@ -479,27 +477,15 @@ export class InventoryService {
       throw new NotFoundException('Product not found');
     }
   
-    // console.log('Verificando internal_code...');
-    // if (request.general_information.internal_code) {
-    //   const productExist = await this.productRepository.findOne({
-    //     where: {
-    //       internal_code: request.general_information.internal_code,
-    //     },
-    //   });
-    //   console.log('🔍 Producto con mismo internal_code encontrado:', productExist);
-    //   if (productExist) {
-    //     throw new NotFoundException('Product already exist with this Internal Code');
-    //   }
-    // }
-  
     console.log('✏️ Actualizando campos básicos del producto...');
     product.name = request.general_information.name || product.name;
     product.skuCode = request.general_information.sku_code || product.skuCode;
     product.subcategoryId = request.general_information.subcategory_id || product.subcategoryId;
     product.salePrice = request.general_information.sale_price || product.salePrice;
-    const expireDate = (request.general_information.expire_date == "" || request.general_information.expire_date == null) ? null : request.general_information.expire_date;
+    const expireDate = (request.general_information.expire_date == "" || request.general_information.expire_date == null)
+      ? null
+      : request.general_information.expire_date;
     product.expireDate = expireDate ? new Date(expireDate) : product.expireDate;
-    // product.internal_code = request.general_information.internal_code || product.internal_code;
     product.weightKg = request.general_information.weight_kg || product.weightKg;
     product.lengthCm = request.general_information.length_cm || product.lengthCm;
     product.widthCm = request.general_information.width_cm || product.widthCm;
@@ -512,9 +498,7 @@ export class InventoryService {
   
     console.log('🖼️ Obteniendo imágenes actuales del producto...');
     const currentProductImages = await this.productImagesRepository.find({
-      where: {
-        productId: product.id,
-      },
+      where: { productId: product.id },
     });
     console.log('🖼️ Imágenes actuales:', currentProductImages);
   
@@ -529,15 +513,25 @@ export class InventoryService {
   
       if (!this.inventoryProvider.isUrl(qrImage.product_image)) {
         console.log('🗑️ Eliminando QR actual (no es URL)');
-        currentProductImages.forEach(async (item) => {
+        for (const item of currentProductImages) {
           if (item.isBarcode) {
-            const bucketName = (item.mongoBucketName == null || item.mongoBucketName == undefined || item.mongoBucketName == "") ? process.env.MONGO_GRIDFS_BUCKET_NAME : item.mongoBucketName;
-            console.log(`🗑️ Eliminando archivo Mongo: ${item.productImageMongoId} del bucket: ${bucketName}`);
-            this.mongoFileStorageService.deleteFile(item.productImageMongoId, bucketName);
+            const bucketName = (item.mongoBucketName == null || item.mongoBucketName == "")
+              ? process.env.MONGO_GRIDFS_BUCKET_NAME
+              : item.mongoBucketName;
+            if (item.productImageMongoId) {
+              try {
+                console.log(`🗑️ Eliminando archivo Mongo: ${item.productImageMongoId} del bucket: ${bucketName}`);
+                await this.mongoFileStorageService.deleteFile(item.productImageMongoId, bucketName);
+              } catch (error) {
+                console.error(`⚠️ Error eliminando archivo Mongo: ${error.message}`);
+              }
+            } else {
+              console.warn(`⚠️ No hay productImageMongoId para el producto ID: ${product.id}, saltando...`);
+            }
             item.productImageMongoId = qrImage.product_image;
             item.mongoBucketName = qrImage.mongo_bucket_name;
           }
-        });
+        }
   
         const currentQrImage = currentProductImages.find((item) => item.isBarcode);
         if (!currentQrImage) {
@@ -561,15 +555,25 @@ export class InventoryService {
   
       if (!this.inventoryProvider.isUrl(coverImage.product_image)) {
         console.log('🗑️ Eliminando Cover actual (no es URL)');
-        currentProductImages.forEach(async (item) => {
+        for (const item of currentProductImages) {
           if (item.isCover) {
-            const bucketName = (item.mongoBucketName == null || item.mongoBucketName == undefined || item.mongoBucketName == "") ? process.env.MONGO_GRIDFS_BUCKET_NAME : item.mongoBucketName;
-            console.log(`🗑️ Eliminando archivo Mongo: ${item.productImageMongoId} del bucket: ${bucketName}`);
-            this.mongoFileStorageService.deleteFile(item.productImageMongoId, bucketName);
+            const bucketName = (item.mongoBucketName == null || item.mongoBucketName == "")
+              ? process.env.MONGO_GRIDFS_BUCKET_NAME
+              : item.mongoBucketName;
+            if (item.productImageMongoId) {
+              try {
+                console.log(`🗑️ Eliminando archivo Mongo: ${item.productImageMongoId} del bucket: ${bucketName}`);
+                await this.mongoFileStorageService.deleteFile(item.productImageMongoId, bucketName);
+              } catch (error) {
+                console.error(`⚠️ Error eliminando archivo Mongo: ${error.message}`);
+              }
+            } else {
+              console.warn(`⚠️ No hay productImageMongoId para el producto ID: ${product.id}, saltando...`);
+            }
             item.productImageMongoId = coverImage.product_image;
             item.mongoBucketName = coverImage.mongo_bucket_name;
           }
-        });
+        }
   
         const currentCoverImage = currentProductImages.find((item) => item.isCover);
         if (!currentCoverImage) {
