@@ -318,19 +318,36 @@ export class SaleService {
   }
 
   async createSale(request: SaleRequestDto) {
+    console.log('🛒 Iniciando creación de venta');
+  
     if (!(request.order_id || request.order_id == 0)) {
       for (const detail of request.details) {
+        console.log(`🔍 Verificando stock del producto ID ${detail.product_id}`);
         await this.saleProvider.verifyProductStock(
           detail.product_id,
           request.branch_id,
           detail.quantity,
         );
       }
-
+  
+      console.log(`🔍 Verificando existencia del método de pago ID: ${request.payment_method_id}`);
+      const paymentMethodExists = await this.paymentMethodRepository.exist({
+        where: { id: request.payment_method_id },
+      });
+  
+      if (!paymentMethodExists) {
+        console.warn(`⚠️ El método de pago ID ${request.payment_method_id} no existe.`);
+        return {
+          success: false,
+          message: `El método de pago especificado no es válido`,
+        };
+      }
+  
+      console.log('🧾 Creando objeto de venta');
       const saleObject = this.saleRepository.create({
         ...request,
         clientId: request.client_id,
-        paymentMethodId: request.payment_method_id,
+        paymentMethodId: request.payment_method_id, // Usamos el ID directamente
         guestDocumentType: request.guest_document_type,
         guestDocumentNumber: request.guest_document_number,
         comments: request.comments,
@@ -347,58 +364,61 @@ export class SaleService {
         totalTaxAmount: request.total_tax_amount,
         totalSale: request.total_sale,
         saleDate: new Date(),
-        saleDetails: request.details.map((detail) => {
-          return {
-            ...detail,
-            productId: detail.product_id,
-            quantity: detail.quantity,
-            unitPrice: detail.unit_price,
-            subTotal: detail.subTotal,
-            discount: detail.discount,
-            taxAmount: detail.tax_amount,
-            totalLine: detail.total_line,
-          };
-        }),
+        saleDetails: request.details.map((detail) => ({
+          ...detail,
+          productId: detail.product_id,
+          quantity: detail.quantity,
+          unitPrice: detail.unit_price,
+          subTotal: detail.subTotal,
+          discount: detail.discount,
+          taxAmount: detail.tax_amount,
+          totalLine: detail.total_line,
+        })),
       });
-
+  
+      console.log('💾 Guardando venta');
       const sale = await this.saleRepository.save(saleObject);
-
+  
       for (const detail of request.details) {
+        console.log(`📦 Actualizando inventario producto ID ${detail.product_id}`);
         await this.saleProvider.updateProductInventory(
           detail.product_id,
           request.branch_id,
           detail.quantity,
         );
       }
-      const salesDiscounts = sale.saleDetails.filter(
-        (detail) => detail.discount > 0,
-      );
-
-      const discountsLogs = this.discountApprovalRepository.create(
-        salesDiscounts.map((sale) => {
-          const item = request.details.filter(
-            (detail) => detail.product_id === sale.productId,
-          )[0];
-          return {
-            cashierId: request.cashier_id,
-            managerId: request.manager_id,
-            productId: item.product_id,
-            saleId: sale.saleId,
-            originalProductPrice: sale.unitPrice,
-            discountProductPrice: sale.unitPrice - sale.discount,
-            discountAmount: sale.discount,
-            discountPercentage: (sale.discount / sale.unitPrice) * 100,
-          };
-        }),
-      );
-
-      await this.discountApprovalRepository.save(discountsLogs);
-
-      return sale;
+  
+      const salesDiscounts = sale.saleDetails.filter((detail) => detail.discount > 0);
+  
+      if (salesDiscounts.length > 0) {
+        console.log(`🧮 Registrando descuentos (${salesDiscounts.length})`);
+        const discountsLogs = this.discountApprovalRepository.create(
+          salesDiscounts.map((sale) => {
+            const item = request.details.find((d) => d.product_id === sale.productId);
+            return {
+              cashierId: request.cashier_id,
+              managerId: request.manager_id,
+              productId: item.product_id,
+              saleId: sale.saleId,
+              originalProductPrice: sale.unitPrice,
+              discountProductPrice: sale.unitPrice - sale.discount,
+              discountAmount: sale.discount,
+              discountPercentage: (sale.discount / sale.unitPrice) * 100,
+            };
+          }),
+        );
+  
+        await this.discountApprovalRepository.save(discountsLogs);
+      }
+  
+      console.log('✅ Venta creada correctamente');
+      return { success: true, data: sale };
     } else {
+      console.log('🔄 Procesando venta a partir de orden existente');
       return this.createSaleFromOrder(request);
     }
   }
+  
 
   async createSaleFromOrder(request: SaleRequestDto) {
     for (const detail of request.details) {
