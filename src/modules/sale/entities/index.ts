@@ -6,7 +6,7 @@ import { SubCategory } from './Products/SubCategory.entity';
 import { ProductImages } from './Products/ProductImage.entity';
 import { TypeProduct } from './Products/TypeProduct.entity';
 import { UnitMeasure } from './Products/UnitMeasure.entity';
-
+import { SaleStatus } from './Products/SaleStatus.entity';
 // clients
 import { Client } from './Clients/Client.entity';
 import { ClientCategory } from './Clients/ClientCategory.entity';
@@ -42,6 +42,7 @@ export {
   ClientPoint,
   Sale,
   SaleDetail,
+  SaleStatus,
   Order,
   OrderDetail,
   DiscountApproval,

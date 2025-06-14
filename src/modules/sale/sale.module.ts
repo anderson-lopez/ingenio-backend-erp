@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { SaleController } from './sale.controller';
 import { SaleService } from './services/sale.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import {
   Product,
   Category,
@@ -20,6 +21,7 @@ import {
   SaleDocumentType,
   Sale,
   SaleDetail,
+  SaleStatus,
   Order,
   OrderDetail,
   DiscountApproval,
@@ -49,6 +51,7 @@ import { SaleProvider } from './providers/sale.provider';
       SaleDocumentType,
       Sale,
       SaleDetail,
+      SaleStatus,
       Order,
       OrderDetail,
       User,

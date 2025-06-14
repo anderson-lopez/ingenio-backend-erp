@@ -27,6 +27,7 @@ import { InventoryHelperProvider } from 'src/modules/inventory/providers/Invento
 import * as bcrypt from 'bcrypt';
 import { SaleProvider } from '../providers/sale.provider';
 import { InventoryDictionary } from 'src/modules/inventory/dictionary/inventory.dictionary';
+import { SaleStatus } from '../entities/Products/SaleStatus.entity';
 
 @Injectable()
 export class SaleService {
@@ -59,6 +60,9 @@ export class SaleService {
     @InjectRepository(DiscountApproval)
     private discountApprovalRepository: Repository<DiscountApproval>,
     private readonly saleProvider: SaleProvider,
+    @InjectRepository(SaleStatus)
+    private saleStatusRepository: Repository<SaleStatus>
+
   ) { }
 
   async getAllProducts() {
@@ -182,6 +186,17 @@ export class SaleService {
     }
     return data;
   }
+
+  async getSaleStatuses() {
+    const data = await this.saleStatusRepository.find();
+  
+    if (!data.length) {
+      throw new NotFoundException('No sale statuses found');
+    }
+  
+    return data;
+  }
+  
 
   async getAllClients() {
     const data = await this.clientRepository.find();

@@ -2,6 +2,17 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsNumber, IsPositive, ValidateNested } from 'class-validator';
 
+export class SaleStatusResponseDto {
+  @ApiProperty({ example: 1 })
+  id: number;
+
+  @ApiProperty({ example: 'Completed' })
+  name: string;
+
+  @ApiProperty({ example: 'The sale was completed successfully' })
+  description: string;
+}
+
 export class SaleDetailRequestDto {
   @ApiProperty()
   @IsPositive()

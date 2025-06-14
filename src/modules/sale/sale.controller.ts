@@ -32,6 +32,13 @@ export class SaleController {
     return this.saleService.getOneProductById(id);
   }
 
+  @Get('statuses')
+  @Permissions('read_sale_statuses')
+  @ApiOperation({ summary: 'Obtener todos los estados de venta' })
+  getSaleStatuses() {
+    return this.saleService.getSaleStatuses();
+  }
+
   @Get('products/barcode/:barcode')
   @ApiParam({ name: 'barcode', type: String })
   @Permissions('read_products')
