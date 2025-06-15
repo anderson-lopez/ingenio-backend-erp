@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { PurchaseService } from './services/purchase.service';
 import { Permissions } from 'src/common/security/permissions.decorator';
@@ -8,6 +8,9 @@ import {
   ValidateMasterPassword,
 } from './dto/purchase.request.dto';
 import { SupplierRequestDto } from './dto/supplier.request.dto';
+import { UpdatePurchaseStatusDto } from './dto/UpdatePurchaseStatusDto.dto';
+import { UpdatePurchaseWmsDto } from './dto/UpdatePurchaseWmsDto.dto';
+import { UpdatePurchaseDocumentDto } from './dto/UpdatePurchaseDocumentDto.dto';
 
 @ApiTags('Purchase')
 @Controller('purchase')
@@ -134,4 +137,37 @@ export class PurchaseController {
     console.log('🔎 Llamado GET /purchase/:id con id:', id);
     return this.purchaseService.getPurchaseById(id);
   }
+
+  @Patch(':id/status')
+  @ApiOperation({ summary: 'Actualizar el estado de la compra' })
+  @ApiResponse({ status: 200, description: 'Status actualizado correctamente' })
+  async updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() request: UpdatePurchaseStatusDto,
+  ) {
+    return this.purchaseService.updatePurchaseStatus(id, request);
+  }
+
+  @Patch(':id/wms')
+  @ApiOperation({ summary: 'Actualizar el código WMS de la compra' })
+  @ApiResponse({ status: 200, description: 'WMS actualizado correctamente' })
+  async updateWms(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() request: UpdatePurchaseWmsDto,
+  ) {
+    return this.purchaseService.updatePurchaseWms(id, request);
+  }
+
+  @Patch(':id/document')
+  @ApiOperation({ summary: 'Actualizar el documento PDF de la compra' })
+  @ApiResponse({ status: 200, description: 'Documento actualizado correctamente' })
+  async updateDocument(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() request: UpdatePurchaseDocumentDto,
+  ) {
+    return this.purchaseService.updatePurchaseDocument(id, request);
+  }
+
+
+
 }

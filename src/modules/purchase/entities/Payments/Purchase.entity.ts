@@ -105,4 +105,21 @@ export class Purchase extends BaseEntity {
   @ManyToOne(() => Order)
   @JoinColumn({ name: 'order_id' })
   order: Order;
+
+  @Column({ type: 'varchar', length: 255, name: 'invoice_number', nullable: true })
+  invoiceNumber: string;
+
+  @Column({ type: 'integer', name: 'cashier_id', nullable: true })
+  cashierId: number;
+
+  @Column({ type: 'integer', name: 'manager_id', nullable: true })
+  managerId: number;
+
+  @Column({ type: 'varchar', length: 255, name: 'wms_code', nullable: true })
+  wmsCode: string;
+
+  @Column({ type: 'varchar', length: 255, name: 'document_path', nullable: true })
+  documentPath: string;
+
+
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Body, Injectable, NotFoundException, Param, Patch } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -20,9 +20,14 @@ import { SupplierRequestDto } from '../dto/supplier.request.dto'; // si lo tiene
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/modules/authentication/entities/user.entity';
+import { UpdatePurchaseStatusDto } from '../dto/UpdatePurchaseStatusDto.dto';
+import { UpdatePurchaseWmsDto } from '../dto/UpdatePurchaseWmsDto.dto';
+import { UpdatePurchaseDocumentDto } from '../dto/UpdatePurchaseDocumentDto.dto';
 
 @Injectable()
 export class PurchaseService {
+
+  purchaseService: any;
   constructor(
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
@@ -206,5 +211,52 @@ export class PurchaseService {
     console.log('✅ Proveedor encontrado:', supplier);
     return supplier;
   }
+
+  async updatePurchaseStatus(id: number, request: UpdatePurchaseStatusDto) {
+    const purchase = await this.purchaseRepository.findOne({
+      where: { id },
+    });
+  
+    if (!purchase) {
+      throw new NotFoundException('La compra no existe');
+    }
+  
+    purchase.PurchaseStatusId = request.purchase_status_id;
+  
+    return this.purchaseRepository.save(purchase);
+  }
+  
+  async updatePurchaseWms(id: number, request: UpdatePurchaseWmsDto) {
+    const purchase = await this.purchaseRepository.findOne({
+      where: { id },
+    });
+  
+    if (!purchase) {
+      throw new NotFoundException('La compra no existe');
+    }
+  
+    purchase.wmsCode = request.wms_code;
+  
+    return this.purchaseRepository.save(purchase);
+  }
+  
+  async updatePurchaseDocument(id: number, request: UpdatePurchaseDocumentDto) {
+    const purchase = await this.purchaseRepository.findOne({
+      where: { id },
+    });
+  
+    if (!purchase) {
+      throw new NotFoundException('La compra no existe');
+    }
+  
+    purchase.documentPath = request.document_path;
+  
+    return this.purchaseRepository.save(purchase);
+  }
+  
+  
+  
+  
+  
 
 }
