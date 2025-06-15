@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiTags, ApiBody, ApiResponse } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiTags, ApiBody, ApiResponse, ApiConsumes } from '@nestjs/swagger';
 import { PurchaseService } from './services/purchase.service';
 import { Permissions } from 'src/common/security/permissions.decorator';
 import {
@@ -11,6 +11,10 @@ import { SupplierRequestDto } from './dto/supplier.request.dto';
 import { UpdatePurchaseStatusDto } from './dto/UpdatePurchaseStatusDto.dto';
 import { UpdatePurchaseWmsDto } from './dto/UpdatePurchaseWmsDto.dto';
 import { UpdatePurchaseDocumentDto } from './dto/UpdatePurchaseDocumentDto.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { MongoClient, ObjectId, GridFSBucket } from 'mongodb';
+import { Response as ExpressResponse } from 'express';
+
 
 @ApiTags('Purchase')
 @Controller('purchase')
@@ -169,5 +173,29 @@ export class PurchaseController {
   }
 
 
+  @Post('upload-file')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    console.log('🧾 Archivo recibido en Controller:', file);
+    if (!file) {
+      throw new BadRequestException('No se recibió ningún archivo.');
+    }
+    return this.purchaseService.saveFileToMongo(file);
+  }
+
+
+ 
 
 }

@@ -1,5 +1,6 @@
-import { Body, Injectable, NotFoundException, Param, Patch } from '@nestjs/common';
+import { Body, Injectable, InternalServerErrorException, NotFoundException, Param, Patch } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { GridFSBucket, MongoClient } from 'mongodb';
 import { Repository } from 'typeorm';
 
 import {
@@ -23,9 +24,12 @@ import { User } from 'src/modules/authentication/entities/user.entity';
 import { UpdatePurchaseStatusDto } from '../dto/UpdatePurchaseStatusDto.dto';
 import { UpdatePurchaseWmsDto } from '../dto/UpdatePurchaseWmsDto.dto';
 import { UpdatePurchaseDocumentDto } from '../dto/UpdatePurchaseDocumentDto.dto';
+import { finished } from 'stream/promises';
+
 
 @Injectable()
 export class PurchaseService {
+
 
   purchaseService: any;
   constructor(
@@ -254,8 +258,41 @@ export class PurchaseService {
     return this.purchaseRepository.save(purchase);
   }
   
+  private mongoUrl = 'mongodb://admin:secret@35.188.35.30:27017';
+  private dbName = 'erp360';
+
   
-  
+  async saveFileToMongo(file: Express.Multer.File) {
+    console.log('🧾 Archivo recibido:', file);
+    console.log('🌐 MONGO_URL:', this.mongoUrl);
+    console.log('📂 MONGO_DB:', this.dbName);
+
+    const client = new MongoClient(this.mongoUrl);
+
+    try {
+      await client.connect();
+      const db = client.db(this.dbName);
+      const bucket = new GridFSBucket(db, { bucketName: 'uploads' });
+
+      const uploadStream = bucket.openUploadStream(file.originalname, {
+        contentType: file.mimetype,
+      });
+
+      uploadStream.end(file.buffer);
+
+      await finished(uploadStream as unknown as NodeJS.WritableStream);
+
+      return {
+        message: 'Archivo subido correctamente',
+        fileId: uploadStream.id,
+        url: `/api/v1/purchase/file/${uploadStream.id}`,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    } finally {
+      await client.close();
+    }
+  }
   
   
 
