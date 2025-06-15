@@ -80,28 +80,66 @@ export class SaleService {
         'productInventory.warehouseBranch.branch',
       ],
     });
-
+  
+    console.log('📌 Resultado de la consulta find() ===>');
+    console.log(JSON.stringify(data, null, 2));
+  
     if (!data.length) {
       throw new NotFoundException('data not found');
     }
+  
     const response = data.map((product) => {
+      console.log('🔍 Producto ID:', product.id);
+  
+      const availability = this.inventoryHelperProvider.productAvailableStatus(
+        product.productInventory,
+      );
+      console.log('✅ Disponibilidad:', availability);
+  
+      const productImages = product.productImages.map((image) => {
+        console.log('🖼️ Imagen:', {
+          id: image.id,
+          mongoId: image.productImageMongoId,
+          bucket: image.mongoBucketName,
+        });
+  
+        const host = process.env.HOST_SERVER;
+        const port = process.env.PORT;
+        const basePath = process.env.BASE_PATH;
+        const mongoId = image.productImageMongoId;
+        const bucketName = image.mongoBucketName || process.env.MONGO_GRIDFS_BUCKET_NAME;
+  
+        console.log('🔗 Datos para construir la URL de la imagen:', {
+          host,
+          port,
+          basePath,
+          mongoId,
+          bucketName,
+        });
+  
+        const publicImageUrl = `http://${host}:${port}${basePath}/mongo-file-storage/${mongoId}?bucketName=${bucketName}`;
+  
+        console.log('🌐 URL Final de Imagen:', publicImageUrl);
+  
+        return {
+          ...image,
+          publicImageUrl,
+        };
+      });
+  
       return {
         ...product,
-        availabilityProduct:
-          this.inventoryHelperProvider.productAvailableStatus(
-            product.productInventory,
-          ),
-        productImages: product.productImages.map((image) => {
-          return {
-            ...image,
-            publicImageUrl: `http://${process.env.HOST_SERVER}:${process.env.PORT}${process.env.BASE_PATH}/mongo-file-storage/${image.productImageMongoId}?bucketName=${image.mongoBucketName || process.env.MONGO_GRIDFS_BUCKET_NAME}`,
-          };
-        }),
+        availabilityProduct: availability,
+        productImages,
       };
     });
-
+  
+    console.log('✅ Resultado final del response:');
+    console.log(JSON.stringify(response, null, 2));
+  
     return response;
   }
+  
 
   public async getOneProductById(id: number) {
     const product = await this.productRepository.findOne({
