@@ -19,6 +19,8 @@ export class Purchase extends BaseEntity {
   @Column({ type: 'integer', name: 'branch_id', nullable: true })
   branchId: number;
 
+  @Column({ name: 'id_user', nullable: true })
+  idUser: number;
 
   @Column({ type: 'integer', name: 'client_id', nullable: true })
   clientId: number;

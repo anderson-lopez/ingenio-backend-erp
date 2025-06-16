@@ -62,6 +62,7 @@ export class PurchaseService {
       paymentMethodId: request.payment_method_id,
       documentTypeId: request.document_type_id,
       branchId: request.branch_id,
+      idUser: request.id_user, // <-- Nuevo campo
       totalPurchase: request.total_purchase,
       PurchaseDate: new Date(request.purchase_date), // 🔥 Usa la misma mayúscula
       PurchaseDetails: request.details.map((detail) => ({

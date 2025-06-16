@@ -126,6 +126,12 @@ export class PurchaseRequestDto {
   @ValidateNested({ each: true })
   @Type(() => PurchaseDetailRequestDto)
   details: PurchaseDetailRequestDto[];
+
+  @ApiProperty({ example: 1, description: 'ID del usuario que está creando la compra' })
+  @IsNumber()
+  @IsPositive()
+  id_user: number;
+
 }
 
 export class PurchaseAuthorizeDiscountDto {
