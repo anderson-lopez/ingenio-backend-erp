@@ -18,6 +18,9 @@ export class Sale extends BaseEntity {
   @Column({ type: 'integer', name: 'client_id', nullable: true })
   clientId: number;
 
+  @Column({ name: 'id_user', nullable: true })
+  idUser: number;
+
   @Column({ type: 'varchar', length: 100, name: 'guest_name' })
   guestName: string;
 

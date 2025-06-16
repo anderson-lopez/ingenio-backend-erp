@@ -43,6 +43,11 @@ export class SaleRequestDto {
   @IsPositive()
   client_id: number;
 
+  @ApiProperty({ example: 1, description: 'ID del usuario que crea la venta' })
+  @IsNumber()
+  @IsPositive()
+  id_user: number;
+
   @ApiProperty()
   guest_name: string;
 

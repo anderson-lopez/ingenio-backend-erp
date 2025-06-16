@@ -379,6 +379,7 @@ export class SaleService {
         totalTaxAmount: request.total_tax_amount,
         totalSale: request.total_sale,
         saleDate: new Date(),
+        idUser: request.id_user, // 👈 Nuevo campo para guardar el usuario
         saleDetails: request.details.map((detail) => ({
           ...detail,
           productId: detail.product_id,
