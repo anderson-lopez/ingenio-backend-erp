@@ -13,13 +13,12 @@ import { Branch } from 'src/modules/inventory/entities';
 import { Client } from '../Clients/Client.entity';
 import { PurchaseDocumentType } from '../Payments/PurchaseDocumentTypes.entity';
 
-@Entity('orders', { schema: 'Purchase' })
+@Entity('Orders', { schema: 'Purchase' })
 export class Order extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'integer', name: 'client_id' })
-  clientId: number;
+
 
   @Column({ type: 'varchar', name: 'guest_name', length: 100 })
   guestName: string;

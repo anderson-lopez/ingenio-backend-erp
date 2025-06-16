@@ -11,6 +11,7 @@ import {
   PurchaseDetail,
   PurchaseDocumentType,
   DiscountApproval,
+  Order,
 } from '../entities/index';
 import {
   PurchaseRequestDto,
@@ -25,6 +26,7 @@ import { UpdatePurchaseStatusDto } from '../dto/UpdatePurchaseStatusDto.dto';
 import { UpdatePurchaseWmsDto } from '../dto/UpdatePurchaseWmsDto.dto';
 import { UpdatePurchaseDocumentDto } from '../dto/UpdatePurchaseDocumentDto.dto';
 import { finished } from 'stream/promises';
+import { UpdatePurchaseDto } from '../dto/update-purchase.dto';
 
 
 @Injectable()
@@ -49,6 +51,8 @@ export class PurchaseService {
     private userRepository: Repository<User>,
     @InjectRepository(DiscountApproval)
     private discountApprovalRepository: Repository<DiscountApproval>,
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
   ) {}
 
   async createPurchase(request: PurchaseRequestDto) {
@@ -293,6 +297,73 @@ export class PurchaseService {
       await client.close();
     }
   }
+  
+  async updatePurchase(id: number, updateDto: UpdatePurchaseDto): Promise<any> {
+    const { details, ...purchaseFields } = updateDto;
+  
+    const entityFields: any = {};
+  
+    if (purchaseFields.supplier_id        !== undefined) entityFields.supplierId        = purchaseFields.supplier_id;
+    if (purchaseFields.purchase_date      !== undefined) entityFields.PurchaseDate      = purchaseFields.purchase_date;
+    if (purchaseFields.invoice_number     !== undefined) entityFields.invoiceNumber     = purchaseFields.invoice_number;
+    if (purchaseFields.payment_method_id  !== undefined) entityFields.paymentMethodId   = purchaseFields.payment_method_id;
+    if (purchaseFields.comments           !== undefined) entityFields.comments          = purchaseFields.comments;
+    if (purchaseFields.document_type_id   !== undefined) entityFields.documentTypeId    = purchaseFields.document_type_id;
+    if (purchaseFields.branch_id          !== undefined) entityFields.branchId          = purchaseFields.branch_id;
+    if (purchaseFields.subtotal           !== undefined) entityFields.subTotal          = purchaseFields.subtotal;
+    if (purchaseFields.discount_total     !== undefined) entityFields.totalDiscount     = purchaseFields.discount_total;
+    if (purchaseFields.tax_total          !== undefined) entityFields.totalTaxAmount    = purchaseFields.tax_total;
+    if (purchaseFields.total_purchase     !== undefined) entityFields.totalPurchase     = purchaseFields.total_purchase;
+    if (purchaseFields.cashier_id         !== undefined) entityFields.cashierId         = purchaseFields.cashier_id;
+    if (purchaseFields.manager_id         !== undefined) entityFields.managerId         = purchaseFields.manager_id;
+    if (purchaseFields.wms_code           !== undefined) entityFields.wmsCode           = purchaseFields.wms_code;
+    if (purchaseFields.document_path      !== undefined) entityFields.documentPath      = purchaseFields.document_path;
+    if (purchaseFields.order_id           !== undefined) entityFields.orderId           = purchaseFields.order_id;
+  
+    // 1. Actualizar cabecera
+    const result = await this.purchaseRepository
+      .createQueryBuilder()
+      .update()
+      .set(entityFields)
+      .where('id = :id', { id })
+      .execute();
+  
+    if (result.affected === 0) {
+      throw new NotFoundException(`Purchase with id ${id} not found`);
+    }
+  
+    // 2. Actualizar detalles (si vienen en la request)
+    if (details?.length) {
+      await this.purchaseDetailRepository
+        .createQueryBuilder()
+        .delete()
+        .where('purchase_id = :id', { id })
+        .execute();
+  
+      const newDetails = details.map(d => ({
+        productId:  d.product_id,
+        quantity:   d.quantity,
+        unitPrice:  d.unit_price,
+        subTotal:   d.sub_total,
+        discount:   d.discount,
+        taxAmount:  d.tax_amount,
+        totalLine:  d.total_line,
+        purchaseId: id, // FK correcta
+      }));
+  
+      await this.purchaseDetailRepository
+        .createQueryBuilder()
+        .insert()
+        .values(newDetails)
+        .execute();
+    }
+  
+    return { message: 'Purchase and details updated successfully' };
+  }
+  
+  
+  
+  
   
   
 

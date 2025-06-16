@@ -15,6 +15,7 @@ import { Permissions } from 'src/common/security/permissions.decorator';
 @ApiTags('Authentication')
 @Controller('authentication')
 export class AuthenticationController {
+  authService: any;
   constructor(private readonly authenticationService: AuthenticationService) {}
 
   @Post('login')
@@ -36,6 +37,14 @@ export class AuthenticationController {
   getAllUsers() {
     return this.authenticationService.getAllUsers();
   }
+
+  @Get('all')
+  @ApiOperation({ summary: 'Obtener todos los usuarios con perfiles (sin autenticación)' })
+  async getAllUsersWithProfiles() {
+    return this.authenticationService.getAllUsers();
+  }
+
+
 
   // get all profiles
   @Get('profiles')
@@ -74,4 +83,6 @@ export class AuthenticationController {
   getManager(@Param('userId') userId: number) {
     return this.authenticationService.getManagerByUserId(userId);
   }
+
+  
 }

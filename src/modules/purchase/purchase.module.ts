@@ -12,6 +12,7 @@ import {
   PurchaseDetail,
   PurchaseDocumentType,
   DiscountApproval,
+  Order,
 } from './entities/index';
 import { User } from '../authentication/entities/user.entity';
 
@@ -26,7 +27,8 @@ import { User } from '../authentication/entities/user.entity';
       PurchaseDocumentType,
       DiscountApproval,
       User,
-      ParseIntPipe
+      ParseIntPipe,
+      Order
     ]),
   ],
   controllers: [PurchaseController],

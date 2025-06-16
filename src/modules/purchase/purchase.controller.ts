@@ -14,6 +14,7 @@ import { UpdatePurchaseDocumentDto } from './dto/UpdatePurchaseDocumentDto.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MongoClient, ObjectId, GridFSBucket } from 'mongodb';
 import { Response as ExpressResponse } from 'express';
+import { UpdatePurchaseDto } from './dto/update-purchase.dto';  // 👉 Asegúrate que exista este DTO y ajusta la ruta
 
 
 @ApiTags('Purchase')
@@ -193,6 +194,62 @@ export class PurchaseController {
       throw new BadRequestException('No se recibió ningún archivo.');
     }
     return this.purchaseService.saveFileToMongo(file);
+  }
+
+
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Actualizar datos de una compra' })
+  @ApiResponse({ status: 200, description: 'Compra actualizada correctamente' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiBody({
+    type: UpdatePurchaseDto,
+    examples: {
+      ejemplo: {
+        summary: 'Ejemplo completo de actualización de compra',
+        value: {
+          supplier_id: 2,
+          purchase_date: '2025-06-15T10:00:00Z',
+          invoice_number: 'INV-9999',
+          payment_method_id: 3,
+          comments: 'Actualización de prueba con todos los campos',
+          document_type_id: 1,
+          branch_id: 1,
+          subtotal: 450,
+          discount_total: 20,
+          tax_total: 60,
+          total_purchase: 490,
+          cashier_id: 2,
+          manager_id: 1,
+          details: [
+            {
+              product_id: 1,
+              quantity: 3,
+              unit_price: 50,
+              sub_total: 150,
+              discount: 10,
+              tax_amount: 20,
+              total_line: 160,
+            },
+            {
+              product_id: 2,
+              quantity: 2,
+              unit_price: 100,
+              sub_total: 200,
+              discount: 5,
+              tax_amount: 30,
+              total_line: 225,
+            },
+          ],
+        },
+      },
+    },
+  })
+  async updatePurchase(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() request: UpdatePurchaseDto,
+  ) {
+    return this.purchaseService.updatePurchase(id, request);
   }
 
 
