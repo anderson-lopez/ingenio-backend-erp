@@ -40,6 +40,9 @@ export class SaleProvider {
     branchId: number,
     unitsToSell: number,
   ) {
+
+    console.log('🛒 Validando stock para:', { productId, branchId, unitsToSell });
+
     const qb = this.productInventoryRepository
       .createQueryBuilder('pi')
       .innerJoin('pi.product', 'p')
@@ -50,7 +53,7 @@ export class SaleProvider {
       });
   
     if (branchId && branchId > 0) {
-      qb.andWhere('b.id = :branchId', { branchId });
+      qb.andWhere('b.id = :branchId', { branchId: Number(branchId) });
     }
   
     const inventories = await qb.getMany();
