@@ -524,7 +524,7 @@ export class SaleService {
   }
 
   async getAllSales() {
-    const data = await this.saleRepository.find({ relations: ['saleDetails'] });
+    const data = await this.saleRepository.find({ relations: ['saleDetails'], order:{id:'DESC'}, });
     if (!data.length) {
       throw new NotFoundException('data not found');
     }
