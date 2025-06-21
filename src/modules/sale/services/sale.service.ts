@@ -340,7 +340,7 @@ export class SaleService {
         console.log(`🔍 Verificando stock del producto ID ${detail.product_id}`);
         await this.saleProvider.verifyProductStock(
           detail.product_id,
-          request.branch_id,
+          1,
           detail.quantity,
         );
       }
