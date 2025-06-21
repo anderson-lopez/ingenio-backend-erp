@@ -338,9 +338,11 @@ export class SaleService {
     if (!(request.order_id || request.order_id == 0)) {
       for (const detail of request.details) {
         console.log(`🔍 Verificando stock del producto ID ${detail.product_id}`);
+        console.log(`🔍 Verificando stock del producto Branch ${request.branch_id}`);
+        console.log(`🔍 Verificando stock del producto Quantity ${detail.quantity}`);
         await this.saleProvider.verifyProductStock(
           detail.product_id,
-          1,
+          request.branch_id,
           detail.quantity,
         );
       }
