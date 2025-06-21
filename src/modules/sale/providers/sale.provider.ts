@@ -45,7 +45,7 @@ export class SaleProvider {
       .innerJoin('pi.product', 'p')
       .innerJoin('pi.warehouseBranch', 'wb')
       .innerJoin('wb.branch', 'b')
-      .where('(pi.productId = :productId OR p.internal_code = :productId)', {
+      .where('(pi.productId = :productId OR p.internal_code::INTEGER = :productId)', {
         productId,
       });
   
