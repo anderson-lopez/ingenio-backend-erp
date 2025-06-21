@@ -40,9 +40,9 @@ export class SaleProvider {
     branchId: number,
     unitsToSell: number,
   ) {
-
-    console.log('🛒 Validando stock para:', { productId, branchId, unitsToSell });
-
+    console.log('🛒 INICIO verifyProductStock');
+    console.log('👉 Parámetros recibidos:', { productId, branchId, unitsToSell });
+  
     const qb = this.productInventoryRepository
       .createQueryBuilder('pi')
       .innerJoin('pi.product', 'p')
@@ -52,26 +52,49 @@ export class SaleProvider {
         productId,
       });
   
-    if (branchId && branchId > 0) {
+    console.log('👉 Query inicial construido.');
+  
+    if (branchId && Number(branchId) > 0) {
       qb.andWhere('b.id = :branchId', { branchId: Number(branchId) });
+      console.log('👉 Filtrando por branchId:', branchId);
+    } else {
+      console.log('👉 No se está filtrando por branchId (se sumará stock global)');
     }
+  
+    console.log('👉 SQL Generado:', qb.getSql());
   
     const inventories = await qb.getMany();
   
+    console.log('👉 Resultado de inventarios encontrados:', inventories.length);
+    inventories.forEach((inv, index) => {
+      console.log(`👉 Inventario [${index}]:`, {
+        id: inv.id,
+        productId: inv.productId,
+        currentStock: inv.currentStock,
+        warehouseBranchId: inv.warehouseBranchId,
+      });
+    });
+  
+    const totalStock = inventories.reduce((sum, inv) => sum + inv.currentStock, 0);
+    console.log('👉 Total Stock Calculado:', totalStock);
+  
     if (!inventories.length) {
+      console.log('❌ No se encontró inventario para el producto.');
       throw new NotFoundException(
         `No se encontró inventario para el producto ${productId}${branchId ? ` en la sucursal ${branchId}` : ''}`,
       );
     }
   
-    const totalStock = inventories.reduce((sum, inv) => sum + inv.currentStock, 0);
-  
     if (totalStock < unitsToSell) {
+      console.log('❌ Stock insuficiente:', { totalStock, unitsToSell });
       throw new NotFoundException(
         `Stock insuficiente para el producto ${productId}. Disponible: ${totalStock}, solicitado: ${unitsToSell}`,
       );
     }
+  
+    console.log('✅ Stock suficiente. Validación finalizada.');
   }
+  
   
   
   
