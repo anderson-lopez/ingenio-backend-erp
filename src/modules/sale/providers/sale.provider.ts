@@ -40,29 +40,38 @@ export class SaleProvider {
     branchId: number,
     unitsToSell: number,
   ) {
-    const productInventory = await this.productInventoryRepository.findOne({
-      where: {
+    const qb = this.productInventoryRepository
+      .createQueryBuilder('pi')
+      .innerJoin('pi.product', 'p')
+      .innerJoin('pi.warehouseBranch', 'wb')
+      .innerJoin('wb.branch', 'b')
+      .where('(pi.productId = :productId OR p.internal_code = :productId)', {
         productId,
-        warehouseBranch: {
-          branch: {
-            id: branchId,
-          },
-        },
-      },
-    });
+      });
   
-    if (!productInventory) {
+    if (branchId && branchId > 0) {
+      qb.andWhere('b.id = :branchId', { branchId });
+    }
+  
+    const inventories = await qb.getMany();
+  
+    if (!inventories.length) {
       throw new NotFoundException(
-        'Product inventory not found for product id ' + productId,
+        `No se encontró inventario para el producto ${productId}${branchId ? ` en la sucursal ${branchId}` : ''}`,
       );
     }
   
-    if (productInventory.currentStock < unitsToSell) {
+    const totalStock = inventories.reduce((sum, inv) => sum + inv.currentStock, 0);
+  
+    if (totalStock < unitsToSell) {
       throw new NotFoundException(
-        'Product stock is not enough for product id ' + productId,
+        `Stock insuficiente para el producto ${productId}. Disponible: ${totalStock}, solicitado: ${unitsToSell}`,
       );
     }
   }
+  
+  
+  
   
   
 }
