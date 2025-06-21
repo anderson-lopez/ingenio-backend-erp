@@ -333,7 +333,7 @@ export class SaleService {
   }
 
   async createSale(request: SaleRequestDto) {
-    console.log('🛒 Iniciando creación de venta');
+    console.log('🛒 Iniciando creación de venta ' + request);
   
     if (!(request.order_id || request.order_id == 0)) {
       for (const detail of request.details) {
