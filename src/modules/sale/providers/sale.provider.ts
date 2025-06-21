@@ -50,17 +50,19 @@ export class SaleProvider {
         },
       },
     });
-
+  
     if (!productInventory) {
       throw new NotFoundException(
         'Product inventory not found for product id ' + productId,
       );
     }
-
+  
     if (productInventory.currentStock < unitsToSell) {
       throw new NotFoundException(
         'Product stock is not enough for product id ' + productId,
       );
     }
   }
+  
+  
 }
