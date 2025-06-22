@@ -290,7 +290,7 @@ export class PurchaseService {
       return {
         message: 'Archivo subido correctamente',
         fileId: uploadStream.id,
-        url: `/api/v1/purchase/file/${uploadStream.id}`,
+        url: `/api/v1/purchase/file/${uploadStream.id}?bucketName=uploads`,
       };
     } catch (error) {
       throw new InternalServerErrorException(error.message);

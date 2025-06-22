@@ -245,12 +245,15 @@ export class PurchaseController {
       },
     },
   })
+  
   async updatePurchase(
     @Param('id', ParseIntPipe) id: number,
     @Body() request: UpdatePurchaseDto,
   ) {
     return this.purchaseService.updatePurchase(id, request);
   }
+
+  
 
 
  
