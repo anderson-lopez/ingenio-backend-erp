@@ -173,6 +173,12 @@ export class PurchaseService {
   
     return savedSupplier;
   }
+
+  async createSupplierN(dto: SupplierRequestDto): Promise<{ id: number }> {
+    const supplier = this.supplierRepository.create(dto);
+    const result = await this.supplierRepository.save(supplier);
+    return { id: result.id };  // Solo devuelve el ID
+  }
   
 
   async getAllPaymentMethods() {
@@ -363,8 +369,7 @@ export class PurchaseService {
   }
   
   
-  
-  
+ 
   
   
 

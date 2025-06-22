@@ -86,6 +86,12 @@ export class PurchaseController {
     return this.purchaseService.createSupplier(supplier);
   }
 
+  // Nuevo endpoint que solo devuelve el ID
+  @Post('suppliers/only-id')
+  async createSupplierN(@Body() dto: SupplierRequestDto) {
+    return this.purchaseService.createSupplierN(dto);
+  }
+
   @Get('payment-methods')
   @Permissions('read_payment_methods')
   @ApiOperation({ summary: 'Get all payment methods' })
@@ -245,7 +251,7 @@ export class PurchaseController {
       },
     },
   })
-  
+
   async updatePurchase(
     @Param('id', ParseIntPipe) id: number,
     @Body() request: UpdatePurchaseDto,

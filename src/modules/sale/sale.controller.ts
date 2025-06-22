@@ -1,11 +1,12 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SaleService } from './services/sale.service';
 import { Permissions } from 'src/common/security/permissions.decorator';
 import { ClientRequestDto } from './dto/client.request.dto';
 import {
   SaleAuthorizeDiscountDto,
   SaleRequestDto,
+  UpdateSaleStatusDto,
   ValidateMasterPassword,
 } from './dto/sale.request.dto';
 
@@ -169,4 +170,27 @@ export class SaleController {
   validatePassword(@Body() request: ValidateMasterPassword) {
     return this.saleService.validateMasterPassword(request);
   }
+
+  @Put('update-status')
+  @ApiOperation({ summary: 'Update sale status by saleId and saleStatusId' })
+  @ApiResponse({ status: 200, description: 'Sale status updated successfully' })
+  @ApiBody({
+    type: UpdateSaleStatusDto,
+    examples: {
+      example1: {
+        summary: 'Example Body',
+        value: {
+          saleId: 15,
+          saleStatusId: 3,
+        },
+      },
+    },
+  })
+  async updateSaleStatus(@Body() dto: UpdateSaleStatusDto) {
+    return this.saleService.updateSaleStatus(dto);
+  }
+
+
+
+
 }

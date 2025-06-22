@@ -145,3 +145,8 @@ export class ValidateMasterPassword {
   manager_password: string;
 
 }
+
+export class UpdateSaleStatusDto {
+  saleId: number;
+  saleStatusId: number;
+}

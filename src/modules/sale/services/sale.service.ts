@@ -21,6 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   SaleAuthorizeDiscountDto,
   SaleRequestDto,
+  UpdateSaleStatusDto,
   ValidateMasterPassword,
 } from '../dto/sale.request.dto';
 import { InventoryHelperProvider } from 'src/modules/inventory/providers/InventoryHelperProvider.provider';
@@ -659,4 +660,23 @@ export class SaleService {
       status: true,
     }
   }
+
+  async updateSaleStatus(dto: UpdateSaleStatusDto): Promise<{ message: string }> {
+    const sale = await this.saleRepository.findOne({ where: { id: dto.saleId } });
+  
+    if (!sale) {
+      throw new NotFoundException(`Sale with ID ${dto.saleId} not found`);
+    }
+  
+    sale.saleStatusId  = dto.saleStatusId;
+  
+    await this.saleRepository.save(sale);
+  
+    return { message: 'Sale status updated successfully' };
+  }
+  
+
+
+
+
 }
