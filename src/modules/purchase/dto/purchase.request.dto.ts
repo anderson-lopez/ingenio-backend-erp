@@ -80,6 +80,11 @@ export class PurchaseRequestDto {
   @IsPositive()
   branch_id: number;
 
+  @ApiProperty({ example: 1 })
+  @IsNumber()
+  @IsPositive()
+  PurchaseStatusId: number;
+
   @ApiProperty({ example: 100.00 })
   @IsNumber()
   @IsPositive()

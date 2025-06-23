@@ -123,5 +123,6 @@ export class Purchase extends BaseEntity {
   @Column({ type: 'varchar', length: 255, name: 'document_path', nullable: true })
   documentPath: string;
 
+ 
 
 }

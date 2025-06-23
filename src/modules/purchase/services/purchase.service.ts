@@ -65,6 +65,7 @@ export class PurchaseService {
       idUser: request.id_user, // <-- Nuevo campo
       totalPurchase: request.total_purchase,
       PurchaseDate: new Date(request.purchase_date), // 🔥 Usa la misma mayúscula
+      PurchaseStatusId: 1,  // ✅ Estado inicial por defecto
       PurchaseDetails: request.details.map((detail) => ({
         productId: detail.product_id,
         quantity: detail.quantity,
@@ -88,6 +89,9 @@ export class PurchaseService {
     try {
       const data = await this.purchaseRepository.find({
         relations: ['PurchaseDetails', 'supplier'],
+        order: {
+          id: 'DESC',  // ✅ Orden descendente por ID
+        },
       });
       console.log('✅ Data encontrada:', data);
   
